@@ -157,6 +157,65 @@ try:
 
                 post_data["screenshot_path"] = screenshot_path
 
+                # Check if the post is a reply and extract parent post details
+                try:
+                    parent_post_element = driver.find_element(By.CSS_SELECTOR, 'article[data-testid="tweet"][role="group"]')
+                    parent_post_data = {}
+
+                    # Extract parent post details
+                    parent_handle = parent_post_element.find_element(By.CSS_SELECTOR, 'div[data-testid="User-Name"] a[href*="/"]').text
+                    parent_post_data["handle"] = parent_handle
+
+                    parent_datetime_elem = parent_post_element.find_element(By.CSS_SELECTOR, 'time')
+                    parent_post_datetime = parent_datetime_elem.get_attribute('datetime')
+                    parent_post_data["datetime"] = parent_post_datetime
+
+                    parent_content_elem = parent_post_element.find_element(By.CSS_SELECTOR, 'div[data-testid="tweetText"]')
+                    parent_content = parent_content_elem.text
+                    parent_post_data["content"] = parent_content
+
+                    # Extract stats for the parent post
+                    parent_stats = parent_post_element.find_elements(By.CSS_SELECTOR, 'div[role="group"] [data-testid*="count"]')
+                    parent_post_data["likes"] = "0"
+                    parent_post_data["reposts"] = "0"
+                    parent_post_data["comments"] = "0"
+                    parent_post_data["views"] = "0"
+
+                    for stat in parent_stats:
+                        aria_label = stat.get_attribute('aria-label')
+                        if aria_label:
+                            if "reply" in aria_label.lower() or "comment" in aria_label.lower():
+                                parent_post_data["comments"] = stat.text if stat.text else "0"
+                            elif "repost" in aria_label.lower() or "retweet" in aria_label.lower():
+                                parent_post_data["reposts"] = stat.text if stat.text else "0"
+                            elif "like" in aria_label.lower():
+                                parent_post_data["likes"] = stat.text if stat.text else "0"
+                            elif "view" in aria_label.lower():
+                                parent_post_data["views"] = stat.text if stat.text else "0"
+
+                    # Take a screenshot of the parent post
+                    parent_location = parent_post_element.location
+                    parent_size = parent_post_element.size
+
+                    screenshot = driver.get_screenshot_as_png()
+                    image = Image.open(BytesIO(screenshot))
+
+                    left = parent_location['x']
+                    top = parent_location['y']
+                    right = left + parent_size['width']
+                    bottom = top + parent_size['height']
+
+                    parent_cropped_image = image.crop((left, top, right, bottom))
+                    parent_screenshot_filename = f"parent_post_{parent_handle.replace('@', '').replace('/', '_')}.png"
+                    parent_cropped_image.save(parent_screenshot_filename)
+                    parent_post_data["screenshot_path"] = os.path.abspath(parent_screenshot_filename)
+
+                    print(f"Parent post screenshot saved as {parent_screenshot_filename}")
+                    post_data["parent_post"] = parent_post_data
+
+                except NoSuchElementException:
+                    print("No parent post found or failed to extract parent post details.")
+
                 # Print extracted data
                 print(f"Handle: {handle}")
                 print(f"Date/Time: {post_datetime}")
