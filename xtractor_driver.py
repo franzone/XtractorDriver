@@ -45,7 +45,7 @@ def setup_firefox_driver(profile_path):
 
 def extract_post_details(driver, post_element, images_dir, post_id_suffix=""):
     """
-    Extract details of a post and take a screenshot.
+    Extract details of a post and take a full-page screenshot.
     :param driver: Selenium WebDriver instance
     :param post_element: WebElement representing the post
     :param images_dir: Directory to save screenshots
@@ -88,41 +88,13 @@ def extract_post_details(driver, post_element, images_dir, post_id_suffix=""):
                 elif "view" in aria_label.lower():
                     post_data["views"] = stat.text if stat.text else "0"
 
-        # Take screenshot
+        # Take full-page screenshot
         screenshot_filename = None
         try:
-            # Scroll to the post
-            driver.execute_script("arguments[0].scrollIntoView(true);", post_element)
-            time.sleep(1)  # Allow time for scrolling
-
-            # Get post element's location and size
-            location = post_element.location
-            size = post_element.size
-
-            # Take full-page screenshot
-            screenshot = driver.get_screenshot_as_png()
-            image = Image.open(BytesIO(screenshot))
-
-            # Calculate crop coordinates
-            left = int(location['x'])
-            top = int(location['y'])
-            right = int(left + size['width'])
-            bottom = int(top + size['height'])
-
-            # Ensure coordinates are within bounds
-            screenshot_width, screenshot_height = image.size
-            left = max(0, left)
-            top = max(0, top)
-            right = min(screenshot_width, right)
-            bottom = min(screenshot_height, bottom)
-
-            # Crop to post area
-            cropped_image = image.crop((left, top, right, bottom))
-
-            # Save cropped image to file
+            # Capture full-page screenshot
             screenshot_filename = os.path.join(images_dir, f"{post_id_suffix}.png")
-            cropped_image.save(screenshot_filename)
-            print(f"Screenshot saved to {screenshot_filename}")
+            driver.save_screenshot(screenshot_filename)
+            print(f"Full-page screenshot saved to {screenshot_filename}")
 
         except Exception as e:
             print(f"Error capturing screenshot: {str(e)}")
@@ -136,17 +108,10 @@ def extract_post_details(driver, post_element, images_dir, post_id_suffix=""):
 
     return post_data
 
-
 def process_urls(driver, urls, db, images_dir):
     """Process the list of URLs and extract post details."""
-    counter = 0  # Initialize counter
     for url in urls:
         print(f"\nProcessing {url}...")
-
-        # Break the loop after 5 iterations for testing purposes
-        if counter >= 5:
-            print("Processed 5 URLs. Exiting for testing purposes.")
-            break
 
         # Check if URL already exists in the database
         existing_record = db.get(Query().url == url)
