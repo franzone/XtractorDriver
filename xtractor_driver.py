@@ -155,9 +155,6 @@ def process_urls(driver, urls, db, images_dir):
             post_data["error"] = "Failed to load post"
             db.insert(post_data)
 
-        # Increment the counter
-        counter += 1
-
         # Small delay to avoid overwhelming the server
         time.sleep(3)
 
