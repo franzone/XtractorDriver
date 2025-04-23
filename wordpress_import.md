@@ -57,21 +57,21 @@ The script expects a JSON file containing the post data in the following format:
 {
     "_default": {
         "1": {
-            "url": "https://x.com/CoreyJMahler/status/1830309275693945000",
+            "url": "https://x.com/SomeHandle/status/5346723412348876940",
             "error": null,
-            "handle": "Corey J. Mahler",
-            "datetime": "2024-09-01T18:18:31.000Z",
-            "content": "I want every Jew to repent and cease to be a Jew. I do not want any Jews \u2014 including former \u2014 in my country. These are not incompatible or incoherent beliefs.",
+            "handle": "Some User",
+            "datetime": "2025-01-01T18:18:31.000Z",
+            "content": "This is the content of my post",
             "likes": "0",
             "reposts": "0",
             "comments": "0",
             "views": "0",
-            "screenshot_file": "images/1830309275693945000.png"
+            "screenshot_file": "images/5346723412348876940.png"
         }
     }
 }
 ```
-- Ensure the `screenshot_file` path points to a valid image file (e.g., `images/1830309275693945000.png`).
+- Ensure the `screenshot_file` path points to a valid image file (e.g., `images/5346723412348876940.png`).
 - The `images/` directory should be in the same directory as the script, or you should provide the correct relative or absolute path to the images.
 
 ### 5. Configure the Script
